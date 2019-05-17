@@ -1,0 +1,10 @@
+C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\bin\Debug\InfoMP.exe.config
+C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\bin\Debug\InfoMP.exe
+C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\bin\Debug\InfoMP.pdb
+C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.csprojAssemblyReference.cache
+C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.Properties.Resources.resources
+C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.csproj.GenerateResource.cache
+C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.csproj.CoreCompileInputs.cache
+C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.exe
+C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.pdb
+C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.Form1.resources
