@@ -30,16 +30,16 @@ namespace InfoMP
         {
             vistalista.Columns.Add(new ColumnHeader());
             vistalista.Columns[0].Text = "Archivo";
-            vistalista.Columns[0].Width = 150;
+            vistalista.Columns[0].Width = 130;
             vistalista.Columns.Add(new ColumnHeader());
             vistalista.Columns[1].Text = "Titulo";
-            vistalista.Columns[1].Width = 150;
+            vistalista.Columns[1].Width = 130;
             vistalista.Columns.Add(new ColumnHeader());
             vistalista.Columns[2].Text = "Artista";
-            vistalista.Columns[2].Width = 150;
+            vistalista.Columns[2].Width = 130;
             vistalista.Columns.Add(new ColumnHeader());
             vistalista.Columns[3].Text = "Album";
-            vistalista.Columns[3].Width = 150;
+            vistalista.Columns[3].Width = 130;
             vistalista.Columns.Add(new ColumnHeader());
             vistalista.Columns[4].Text = "Ruta";
             vistalista.Columns[4].Width = 500;
@@ -106,7 +106,8 @@ namespace InfoMP
 
                     //If is a file MP3
 
-                    if (ext[ext.Length - 1] == "mp3")
+                    if ((ext[ext.Length - 1] == "mp3") 
+                        || (ext[ext.Length - 1] == "MP3"))
                     {
                         r.Seek(-128, SeekOrigin.End);
                         byte[] data = new byte[128];
@@ -158,12 +159,14 @@ namespace InfoMP
                             comtext.Text = comment;
                             et.SetComment(comment);
 
+                            TagLib.File tgFile = TagLib.File.Create(filePath);
+
                             DetectFile(name, filePath, et);
                         }
                     }
                     else
                     {
-                        string message = "Error: Archivo Incompatible";
+                        string message = "Error: " + name + " es un Archivo Incompatible";
                         string caption = "Error";
                         MessageBox.Show(message, caption,
                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -184,7 +187,8 @@ namespace InfoMP
         {
             string[] ext = name.Split('.');
 
-            if (ext[ext.Length - 1] == "mp3")
+            if ((ext[ext.Length - 1] == "mp3")
+                || (ext[ext.Length - 1] == "MP3"))
             {
                 ListViewItem listViewItem = new ListViewItem(new string[] {
                     name, et.GetTitle(), et.GetArtist(), et.GetAlbum(), filePath },
@@ -195,164 +199,111 @@ namespace InfoMP
 
         }
 
-        /*
-        protected void saving_file(string title, string )
-        {
-            //Global Count
-            int countglobal = 0;
-
-            //Title To Char...
-            int countTitle = title.Length;
-            char[] titchar = new char[title.Length];
-            foreach (char ctit in title)
-            {
-                titchar[countglobal] = ctit;
-                countglobal++;
-            }
-
-            countglobal = 0;
-
-            //Char to byte and write to file...
-            for (int i = 3; i < 33; i++)
-            {
-                if (countTitle < 33)
-                {
-                    data[i] = (byte)titchar[countglobal];
-                    countglobal++;
-                }
-            }
-        }
-        */
-
+        //*PARA QUE FUNCIONE EL GUARDADO SE DEBE INICIAR SIN EL MENU DEPURAR
+        
         private void guardarbtn_Click(object sender, EventArgs e)
         {
             try
             {
-                string filePath = vistalista.FocusedItem.SubItems[4].Text;
-                string name = vistalista.FocusedItem.SubItems[0].Text;
+                string filePath = null;
+                string name = null;
 
-                using (var r = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                if (vistalista.SelectedItems.Count == 1)
                 {
-                    byte first = (byte)r.ReadByte();
-                    byte second = (byte)r.ReadByte();
-                    byte third = (byte)r.ReadByte();
-                    string[] ext = name.Split('.');
+                    filePath = vistalista.FocusedItem.SubItems[4].Text;
+                    name = vistalista.FocusedItem.SubItems[0].Text;
+                    Etiqueta et = new Etiqueta();
+                    //Add Save File
 
-                    //If is a file MP3
+                    TagLib.File tagFile = TagLib.File.Create(filePath);
+                    TagLib.Id3v2.Tag.DefaultVersion = 3;
+                    TagLib.Id3v2.Tag.ForceDefaultVersion = true;
 
-                    if (ext[ext.Length - 1] == "mp3")
-                    {
-                        r.Seek(-128, SeekOrigin.End);
-                        byte[] data = new byte[128];
-                        int read = r.Read(data, 0, 128);
-                        DirectoryInfo dir = new DirectoryInfo(".");
-                        FileInfo[] fichs = dir.GetFiles();
-                        name = "";
-                        filePath = ".";
-                        Etiqueta et = new Etiqueta();
+                    //Change of title
+                    tagFile.Tag.Title = null;
+                    et.SetTitle(titulotext.Text);
+                    tagFile.Tag.Title = et.GetTitle();
+                    
+                    
+                    //Change of Artists
+                    et.SetArtist(artistatext.Text);
+                    string[] toArtist = et.GetArtist().Split(',');
 
-                        //Check bytes
+                    tagFile.Tag.Performers = null;
+                    tagFile.Tag.Performers = toArtist; //new string[1]
 
-                        //Reset Basic Info
-                        string title = "";
-                        string artist = "";
-                        string album = "";
-                        string year = "";
-                        string comment = "";
+                    
+                    //Change of album
+                    tagFile.Tag.Album = null;
+                    et.SetAlbum(albumtext.Text);
+                    tagFile.Tag.Album = et.GetAlbum();
+                    
+                    //Change of year
+                    et.SetYear(anyotext.Text);
+                    uint yesyear;
+                    bool probandoanyo = uint.TryParse(et.GetYear(), out yesyear);
+                    
+                    if ( probandoanyo == true)
+                        tagFile.Tag.Year = yesyear;
 
-                        //Reset Extra Info
-                        string num = "";
-                        string comp = "";
-                        string numcd = "";
+                    //Change of Comment
+                    tagFile.Tag.Comment = null;
+                    et.SetComment(comtext.Text);
+                    tagFile.Tag.Comment = et.GetComment();
 
-                        //Add Title Info
-                        for (int i = 3; i < 33; i++)
-                            if (data[i] != 0)
-                                title += Convert.ToChar(data[i]);
+                    //Change of Genre
+                    et.SetGenre(generotext.Text);
+                    string[] toGenre = et.GetGenre().Split(',');
 
-                        //Add Artist Info
-                        for (int i = 33; i < 63; i++)
-                            if (data[i] != 0)
-                                artist += Convert.ToChar(data[i]);
+                    tagFile.Tag.Genres = null;
+                    tagFile.Tag.Genres = toGenre;
 
-                        //Add Album Info
-                        for (int i = 63; i < 93; i++)
-                            if (data[i] != 0)
-                                album += Convert.ToChar(data[i]);
+                    //Change of Track Number
+                    et.SetNumber(pistatext.Text);
+                    uint yestrack;
+                    bool probandotrack = uint.TryParse(et.GetNumber(), out yestrack);
 
-                        //Add Year Info
-                        for (int i = 93; i < 97; i++)
-                            if (data[i] != 0)
-                                year += Convert.ToChar(data[i]);
+                    if (probandotrack == true)
+                        tagFile.Tag.Track = yestrack;
 
-                        //Add Comment Info
-                        for (int i = 97; i < 127; i++)
-                            if (data[i] != 0)
-                                comment += Convert.ToChar(data[i]);
+                    //Change of Composer
+                    et.SetComp(comptext.Text);
+                    string[] toComp = et.GetComp().Split(',');
 
-                        //TODO Add Track Info
-                        //TODO Add Comp. Info
-                        //TODO Add NumCd Info
-                        //TODO Add Image Info
+                    tagFile.Tag.Composers = null;
+                    tagFile.Tag.Composers = toComp;
 
-                        //Add Change of atributte if they are different
+                    //Change of Num CD
+                    et.SetNumcd(numtext.Text);
+                    uint yesdisc;
+                    bool probandodisc = uint.TryParse(et.GetNumcd(), out yesdisc);
 
-                        if (title != et.GetTitle())
-                            title = et.GetTitle();
-                        else if (artist != et.GetArtist())
-                            artist = et.GetArtist();
-                        else if (album != et.GetAlbum())
-                            album = et.GetAlbum();
-                        else if (year != et.GetYear())
-                            year = et.GetYear();
-                        else if (comment != et.GetComment())
-                            comment = et.GetComment();
-                        else if (num != et.GetNumber())
-                            num = et.GetNumber();
-                        else if (comp != et.GetComp())
-                            comp = et.GetComp();
-                        else if (numcd != et.GetNumcd())
-                            numcd = et.GetNumcd();
+                    if (probandodisc == true)
+                        tagFile.Tag.Disc = yesdisc;
+                    
+                    tagFile.Save();
 
-                        if (vistalista.SelectedItems != null)
-                        {
-                            //TODO Add Save File
-
-                            //Global Count
-                            int countglobal = 0;
-
-                            //Title To Char...
-                            int countTitle = title.Length;
-                            char[] titchar = new char[title.Length];
-                            foreach (char ctit in title)
-                            {
-                                titchar[countglobal] = ctit;
-                                countglobal++;
-                            }
-
-                            countglobal = 0;
-
-                            //Char to byte and write to file...
-                            for (int i = 3; i < 33; i++)
-                            {
-                                if(countTitle < 33)
-                                {
-                                    data[i] = (byte)titchar[countglobal];
-                                    countglobal++;
-                                }
-                            }
-
-                            vistalista.Clear();
-                            columns();
-                            DetectFile(name, filePath, et);
-                        }
-                    }
-                    r.Close();
+                    string message = "Etiqueta Guardada";
+                    string caption = "Info";
+                    DialogResult result = MessageBox.Show(message, caption,
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
+                else if((vistalista.SelectedItems.Count < 0) ||
+                    (filePath == null) || (name == null))
+                {
+                    string message = "Aviso: No se ha seleccionado cancion";
+                    string caption = "Aviso";
+                    DialogResult result = MessageBox.Show(message, caption,
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                
             }
             catch(Exception e_Save)
             {
-                string message = "Error: " + e_Save.Message;
+                string message = "Error: " + e_Save.Message + ": " + e_Save.Source
+                    + Environment.NewLine +
+                    Environment.NewLine +
+                    "Mas informacion en Ayuda";
                 string caption = "Error";
                 DialogResult result = MessageBox.Show(message, caption,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -365,14 +316,26 @@ namespace InfoMP
                 Environment.NewLine +
                 Environment.NewLine +
                 "Seleccionar: Selecciona una cancion " +
-                "si has abierto varios archivos" +
+                "si has abierto varios archivos." +
                 Environment.NewLine +
                 Environment.NewLine +
                 "Guardar: Guarda la cancion seleccionada con " +
                 "los cambios correspondientes." +
                 Environment.NewLine +
-                Environment.NewLine
-                + "Ayuda: Muestra este mensaje de ayuda.";
+                Environment.NewLine +
+                "Ayuda: Muestra este mensaje de ayuda." +
+                Environment.NewLine +
+                Environment.NewLine +
+                "Aviso: Para el correcto funcionamiento del " +
+                "programa, iniciar SIN el Menu 'Depurar'"+
+                Environment.NewLine +
+                Environment.NewLine +
+                "Error '.InfoMP' al Guardar: No has seleccionado " +
+                "ninguna cancion despues de cargarlas" +
+                Environment.NewLine +
+                Environment.NewLine +
+                "Error '.mscorlib' al Guardar: Has abierto el programa" +
+                " en depuracion (En progreso...)";
             string caption = "Ayuda";
             DialogResult result = MessageBox.Show(message, caption,
                     MessageBoxButtons.OK, MessageBoxIcon.Question);
@@ -443,7 +406,9 @@ namespace InfoMP
 
                     string[] ext = name.Split('.');
 
-                    if ((ext[ext.Length - 1] == "mp3") || (ext[ext.Length - 1] == "wav"))
+                    if ((ext[ext.Length - 1] == "mp3") ||
+                        (ext[ext.Length - 1] == "MP3") ||
+                        (ext[ext.Length - 1] == "wav"))
                     {
                         Process process = new Process();
 
@@ -504,7 +469,8 @@ namespace InfoMP
 
                         string[] ext = name.Split('.');
 
-                        if (ext[ext.Length - 1] == "mp3")
+                        if ((ext[ext.Length - 1] == "mp3") ||
+                            (ext[ext.Length - 1] == "MP3"))
                         {
                             r.Seek(-128, SeekOrigin.End);
                             byte[] data = new byte[128];
