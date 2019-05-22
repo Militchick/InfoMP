@@ -96,82 +96,144 @@ namespace InfoMP
         {
             try
             {
-                using (var r = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                Etiqueta et = new Etiqueta();
+                string[] ext = name.Split('.');
+
+                //If is a file MP3
+
+                if ((ext[ext.Length - 1] == "mp3")
+                    || (ext[ext.Length - 1] == "MP3"))
                 {
-                    byte first = (byte)r.ReadByte();
-                    byte second = (byte)r.ReadByte();
-                    byte third = (byte)r.ReadByte();
 
-                    string[] ext = name.Split('.');
-
-                    //If is a file MP3
-
-                    if ((ext[ext.Length - 1] == "mp3") 
-                        || (ext[ext.Length - 1] == "MP3"))
+                    using (var r = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
+
+                        byte first = (byte)r.ReadByte();
+                        byte second = (byte)r.ReadByte();
+                        byte third = (byte)r.ReadByte();
+
                         r.Seek(-128, SeekOrigin.End);
                         byte[] data = new byte[128];
                         int read = r.Read(data, 0, 128);
+                        
+                        //Reset Basic Info
+                        string title = "";
+                        string artist = "";
+                        string album = "";
+                        string year = "";
+                        string comment = "";
 
-                        if (data[0] == 'T' && data[1] == 'A'
-                            && data[2] == 'G')
-                        {
-                            //Reset Basic Info
-                            string title = "";
-                            string artist = "";
-                            string album = "";
-                            string year = "";
-                            string comment = "";
-                            Etiqueta et = new Etiqueta();
+                        //Add Title Info
+                        for (int i = 3; i < 33; i++)
+                            if (data[i] != 0)
+                                title += Convert.ToChar(data[i]);
+                        titulotext.Text = title;
+                        et.SetTitle(title);
 
-                            //Add Title Info
-                            for (int i = 3; i < 33; i++)
-                                if (data[i] != 0)
-                                    title += Convert.ToChar(data[i]);
-                            titulotext.Text = title;
-                            et.SetTitle(title);
+                        //Add Artist Info
+                        for (int i = 33; i < 63; i++)
+                            if (data[i] != 0)
+                                artist += Convert.ToChar(data[i]);
+                        artistatext.Text = artist;
+                        et.SetArtist(artist);
 
-                            //Add Artist Info
-                            for (int i = 33; i < 63; i++)
-                                if (data[i] != 0)
-                                    artist += Convert.ToChar(data[i]);
-                            artistatext.Text = artist;
-                            et.SetArtist(artist);
+                        //Add Album Info
+                        for (int i = 63; i < 93; i++)
+                            if (data[i] != 0)
+                                album += Convert.ToChar(data[i]);
+                        albumtext.Text = album;
+                        et.SetAlbum(album);
 
-                            //Add Album Info
-                            for (int i = 63; i < 93; i++)
-                                if (data[i] != 0)
-                                    album += Convert.ToChar(data[i]);
-                            albumtext.Text = album;
-                            et.SetAlbum(album);
+                        //Add Year Info
+                        for (int i = 93; i < 97; i++)
+                            if (data[i] != 0)
+                                year += Convert.ToChar(data[i]);
+                        anyotext.Text = year;
+                        et.SetYear(year);
 
-                            //Add Year Info
-                            for (int i = 93; i < 97; i++)
-                                if (data[i] != 0)
-                                    year += Convert.ToChar(data[i]);
-                            anyotext.Text = year;
-                            et.SetYear(year);
+                        //Add Comment Info
+                        for (int i = 97; i < 127; i++)
+                            if (data[i] != 0)
+                                comment += Convert.ToChar(data[i]);
+                        comtext.Text = comment;
+                        et.SetComment(comment);
+                        
+                        r.Close();
+                    }
 
-                            //Add Comment Info
-                            for (int i = 97; i < 127; i++)
-                                if (data[i] != 0)
-                                    comment += Convert.ToChar(data[i]);
-                            comtext.Text = comment;
-                            et.SetComment(comment);
+                    //Add Genre Info
+                    TagLib.File tgFile = TagLib.File.Create(filePath);
+                    string[] toGenre = tgFile.Tag.Genres;
+                    foreach (string g in toGenre)
+                    {
+                        generotext.Text = g;
+                        et.SetGenre(g);
+                    }
 
-                            TagLib.File tgFile = TagLib.File.Create(filePath);
+                    if(toGenre == null)
+                    {
+                        generotext.Text = string.Empty;
+                        et.SetGenre(string.Empty);
+                    }
 
-                            DetectFile(name, filePath, et);
-                        }
+                    toGenre = null;
+
+                    //Add Track Number
+                    uint toTrack = tgFile.Tag.Track;
+                    string track = Convert.ToString(toTrack);
+                    
+                    if (track == "0")
+                    {
+                        pistatext.Text = string.Empty;
+                        et.SetNumber(string.Empty);
                     }
                     else
                     {
-                        string message = "Error: " + name + " es un Archivo Incompatible";
-                        string caption = "Error";
-                        MessageBox.Show(message, caption,
-                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        pistatext.Text = track;
+                        et.SetNumber(track);
                     }
-                    r.Close();
+
+                    //Add of Composer
+                    string[] toComp = tgFile.Tag.Composers;
+                    foreach (string comp in toComp)
+                    {
+                        comptext.Text = comp;
+                        et.SetComp(comp);
+                    }
+
+                    if (toComp == null)
+                    {
+                        comptext.Text = string.Empty;
+                        et.SetComp(string.Empty);
+                    }
+
+                    toComp = null;
+
+                    //Add of Num CD
+                    uint toNumcd = tgFile.Tag.Disc;
+                    string numcd = Convert.ToString(toNumcd);
+                    
+                    if (numcd == "0")
+                    {
+                        numtext.Text = "1";
+                        et.SetNumcd("1");
+                    }
+                    else
+                    {
+                        numtext.Text = numcd;
+                        et.SetNumcd(numcd);
+                    }
+
+                    tgFile.Dispose();
+
+                    DetectFile(name, filePath, et);
+                }
+                else
+                {
+                    string message = "Error: " + name + " es un Archivo Incompatible";
+                    string caption = "Error";
+                    MessageBox.Show(message, caption,
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception e)
@@ -282,6 +344,7 @@ namespace InfoMP
                         tagFile.Tag.Disc = yesdisc;
                     
                     tagFile.Save();
+                    tagFile.Dispose();
 
                     string message = "Etiqueta Guardada";
                     string caption = "Info";
@@ -295,6 +358,39 @@ namespace InfoMP
                     string caption = "Aviso";
                     DialogResult result = MessageBox.Show(message, caption,
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+
+                    ListView.SelectedListViewItemCollection select =
+                        this.vistalista.SelectedItems;
+
+                    foreach (ListViewItem item in select)
+                    {
+                        filePath = vistalista.FocusedItem.SubItems[4].Text;
+                        name = vistalista.FocusedItem.SubItems[0].Text;
+                        Etiqueta et = new Etiqueta();
+                        //Add Save File
+
+                        TagLib.File tagFile = TagLib.File.Create(filePath);
+                        TagLib.Id3v2.Tag.DefaultVersion = 3;
+                        TagLib.Id3v2.Tag.ForceDefaultVersion = true;
+
+                        switch (titulotext.Text)
+                        {
+                            case "<mantener>":
+                                //Do Nothing
+                                break;
+
+                            case "<borrar>":
+
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                    }
                 }
                 
             }
@@ -335,7 +431,7 @@ namespace InfoMP
                 Environment.NewLine +
                 Environment.NewLine +
                 "Error '.mscorlib' al Guardar: Has abierto el programa" +
-                " en depuracion (En progreso...)";
+                " en depuracion";
             string caption = "Ayuda";
             DialogResult result = MessageBox.Show(message, caption,
                     MessageBoxButtons.OK, MessageBoxIcon.Question);
@@ -408,7 +504,8 @@ namespace InfoMP
 
                     if ((ext[ext.Length - 1] == "mp3") ||
                         (ext[ext.Length - 1] == "MP3") ||
-                        (ext[ext.Length - 1] == "wav"))
+                        (ext[ext.Length - 1] == "wav") ||
+                        (ext[ext.Length - 1] == "WAV"))
                     {
                         Process process = new Process();
 
@@ -461,68 +558,100 @@ namespace InfoMP
                     string filePath = vistalista.FocusedItem.SubItems[4].Text;
                     string name = vistalista.FocusedItem.SubItems[0].Text;
                     
-                    using (var r = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    string[] ext = name.Split('.');
+
+                    if ((ext[ext.Length - 1] == "mp3") ||
+                        (ext[ext.Length - 1] == "MP3"))
                     {
-                        byte first = (byte)r.ReadByte();
-                        byte second = (byte)r.ReadByte();
-                        byte third = (byte)r.ReadByte();
+                        Etiqueta et = new Etiqueta();
 
-                        string[] ext = name.Split('.');
-
-                        if ((ext[ext.Length - 1] == "mp3") ||
-                            (ext[ext.Length - 1] == "MP3"))
+                        using (var r = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                         {
+                            byte first = (byte)r.ReadByte();
+                            byte second = (byte)r.ReadByte();
+                            byte third = (byte)r.ReadByte();
+                       
                             r.Seek(-128, SeekOrigin.End);
                             byte[] data = new byte[128];
                             int read = r.Read(data, 0, 128);
+                            
+                            //Reset Basic Info
+                            string title = "";
+                            string artist = "";
+                            string album = "";
+                            string year = "";
+                            string comment = "";
 
-                            if (data[0] == 'T' && data[1] == 'A'
-                                && data[2] == 'G')
-                            {
-                                //Reset Basic Info
-                                string title = "";
-                                string artist = "";
-                                string album = "";
-                                string year = "";
-                                string comment = "";
-                                Etiqueta et = new Etiqueta();
+                            //Add Title Info
+                            for (int i = 3; i < 33; i++)
+                                if (data[i] != 0)
+                                    title += Convert.ToChar(data[i]);
+                            titulotext.Text = title;
+                            et.SetTitle(title);
 
-                                //Add Title Info
-                                for (int i = 3; i < 33; i++)
-                                    if (data[i] != 0)
-                                        title += Convert.ToChar(data[i]);
-                                titulotext.Text = title;
-                                et.SetTitle(title);
+                            //Add Artist Info
+                            for (int i = 33; i < 63; i++)
+                                if (data[i] != 0)
+                                    artist += Convert.ToChar(data[i]);
+                            artistatext.Text = artist;
+                            et.SetArtist(artist);
 
-                                //Add Artist Info
-                                for (int i = 33; i < 63; i++)
-                                    if (data[i] != 0)
-                                        artist += Convert.ToChar(data[i]);
-                                artistatext.Text = artist;
-                                et.SetArtist(artist);
+                            //Add Album Info
+                            for (int i = 63; i < 93; i++)
+                                if (data[i] != 0)
+                                    album += Convert.ToChar(data[i]);
+                            albumtext.Text = album;
+                            et.SetAlbum(album);
 
-                                //Add Album Info
-                                for (int i = 63; i < 93; i++)
-                                    if (data[i] != 0)
-                                        album += Convert.ToChar(data[i]);
-                                albumtext.Text = album;
-                                et.SetAlbum(album);
+                            //Add Year Info
+                            for (int i = 93; i < 97; i++)
+                                if (data[i] != 0)
+                                    year += Convert.ToChar(data[i]);
+                            anyotext.Text = year;
+                            et.SetYear(year);
 
-                                //Add Year Info
-                                for (int i = 93; i < 97; i++)
-                                    if (data[i] != 0)
-                                        year += Convert.ToChar(data[i]);
-                                anyotext.Text = year;
-                                et.SetYear(year);
+                            //Add Comment Info
+                            for (int i = 97; i < 127; i++)
+                                if (data[i] != 0)
+                                    comment += Convert.ToChar(data[i]);
+                            comtext.Text = comment;
+                            et.SetComment(comment);
 
-                                //Add Comment Info
-                                for (int i = 97; i < 127; i++)
-                                    if (data[i] != 0)
-                                        comment += Convert.ToChar(data[i]);
-                                comtext.Text = comment;
-                                et.SetComment(comment);
-                            }
+                            r.Close();
                         }
+
+                        //Add Genre Info
+                        TagLib.File tgFile = TagLib.File.Create(filePath);
+                        string[] toGenre = tgFile.Tag.Genres;
+                        foreach (string g in toGenre)
+                        {
+                            generotext.Text = g;
+                            et.SetGenre(g);
+                        }
+
+                        //Add Track Number
+                        uint toTrack = tgFile.Tag.Track;
+                        string track = Convert.ToString(toTrack);
+
+                        pistatext.Text = track;
+                        et.SetNumber(track);
+
+                        //Add of Composer
+                        string[] toComp = tgFile.Tag.Composers;
+                        foreach (string comp in toComp)
+                        {
+                            comptext.Text = comp;
+                            et.SetComp(comp);
+                        }
+
+                        //Add of Num CD
+                        uint toNumcd = tgFile.Tag.Disc;
+                        string numcd = Convert.ToString(toNumcd);
+
+                        numtext.Text = numcd;
+                        et.SetNumcd(numcd);
+
+                        tgFile.Dispose();
                     }
                 }
                 else
