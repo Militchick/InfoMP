@@ -52,13 +52,13 @@ namespace InfoMP
             this.numtext = new System.Windows.Forms.TextBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.cm = new System.Windows.Forms.ContextMenu();
+            this.menuItem1 = new System.Windows.Forms.MenuItem();
+            this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.abrirbtn = new System.Windows.Forms.Button();
             this.guardarbtn = new System.Windows.Forms.Button();
             this.ayudabtn = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.vistalista = new System.Windows.Forms.ListView();
-            this.menuItem1 = new System.Windows.Forms.MenuItem();
-            this.menuItem2 = new System.Windows.Forms.MenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -242,7 +242,17 @@ namespace InfoMP
             this.cm.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItem1,
             this.menuItem2});
+            // 
+            // menuItem1
+            // 
+            this.menuItem1.Index = 0;
+            this.menuItem1.Text = "Añadir Caratula";
             this.menuItem1.Click += new System.EventHandler(this.anyadir_Caratula);
+            // 
+            // menuItem2
+            // 
+            this.menuItem2.Index = 1;
+            this.menuItem2.Text = "Borrar Caratula";
             this.menuItem2.Click += new System.EventHandler(this.borrar_Caratula);
             // 
             // abrirbtn
@@ -300,16 +310,6 @@ namespace InfoMP
             this.vistalista.View = System.Windows.Forms.View.Details;
             this.vistalista.SelectedIndexChanged += new System.EventHandler(this.vistalista_SelectedIndexChanged);
             this.vistalista.DoubleClick += new System.EventHandler(this.vistalista_DobleClick);
-            // 
-            // menuItem1
-            // 
-            this.menuItem1.Index = 0;
-            this.menuItem1.Text = "Añadir Caratula";
-            // 
-            // menuItem2
-            // 
-            this.menuItem2.Index = 1;
-            this.menuItem2.Text = "Borrar Caratula";
             // 
             // Form1
             // 

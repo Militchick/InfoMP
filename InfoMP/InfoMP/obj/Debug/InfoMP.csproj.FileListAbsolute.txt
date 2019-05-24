@@ -7,8 +7,8 @@ C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\Inf
 C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.csproj.CoreCompileInputs.cache
 C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.exe
 C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.pdb
-C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.Form1.resources
 C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\bin\Debug\policy.2.0.taglib-sharp.dll
 C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\bin\Debug\taglib-sharp.dll
 C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\bin\Debug\policy.2.0.taglib-sharp.config
 C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.csproj.CopyComplete
+C:\Users\Usuario\Desktop\Programacion-2018\Proyectos\InfoMP\InfoMP\obj\Debug\InfoMP.Form1.resources

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -224,6 +225,12 @@ namespace InfoMP
                         et.SetNumcd(numcd);
                     }
 
+                    //Add Cover CD (To PictureBox1)
+                    MemoryStream img = new MemoryStream(tgFile.Tag.Pictures[0].Data.Data);
+                    et.SetImg(img);
+                    Image bitmap = new Bitmap(et.GetImg());
+                    pictureBox1.Image = bitmap;
+
                     tgFile.Dispose();
 
                     DetectFile(name, filePath, et);
@@ -351,8 +358,7 @@ namespace InfoMP
                     DialogResult result = MessageBox.Show(message, caption,
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                else if((vistalista.SelectedItems.Count < 0) ||
-                    (filePath == null) || (name == null))
+                else if(vistalista.SelectedItems.Count < 1)
                 {
                     string message = "Aviso: No se ha seleccionado cancion";
                     string caption = "Aviso";
@@ -365,34 +371,206 @@ namespace InfoMP
                     ListView.SelectedListViewItemCollection select =
                         this.vistalista.SelectedItems;
 
+                    int contEt = 0;
+
+                    Etiqueta et = new Etiqueta();
+                    string titulo = titulotext.Text;
+                    et.SetTitle(titulo);
+                    string artista = artistatext.Text;
+                    et.SetArtist(artista);
+                    string album = albumtext.Text;
+                    et.SetAlbum(album);
+                    string year = anyotext.Text;
+                    et.SetYear(year);
+                    string comment = comtext.Text;
+                    et.SetComment(comment);
+                    string genre = generotext.Text;
+                    et.SetGenre(genre);
+                    string pista = pistatext.Text;
+                    et.SetNumber(pista);
+                    string comp = comptext.Text;
+                    et.SetComp(comp);
+                    string numcd = numtext.Text;
+                    et.SetNumcd(numcd);
+
                     foreach (ListViewItem item in select)
                     {
-                        filePath = vistalista.FocusedItem.SubItems[4].Text;
-                        name = vistalista.FocusedItem.SubItems[0].Text;
-                        Etiqueta et = new Etiqueta();
+                        int total = select.Count;
+                        contEt++;
+
+                        filePath = item.SubItems[4].Text;
+                        name = item.SubItems[0].Text;
+
                         //Add Save File
 
                         TagLib.File tagFile = TagLib.File.Create(filePath);
                         TagLib.Id3v2.Tag.DefaultVersion = 3;
                         TagLib.Id3v2.Tag.ForceDefaultVersion = true;
 
-                        switch (titulotext.Text)
+                        switch(titulo)
                         {
                             case "<mantener>":
                                 //Do Nothing
                                 break;
 
                             case "<borrar>":
-
+                                tagFile.Tag.Title = null;
                                 break;
 
                             default:
-
+                                tagFile.Tag.Title = et.GetTitle();
                                 break;
                         }
+
+                        switch(artista)
+                        {
+                            case "<mantener>":
+                                //Do Nothing
+                                break;
+
+                            case "<borrar>":
+                                tagFile.Tag.Performers = null;
+                                break;
+
+                            default:
+                                string[] toArtist = et.GetArtist().Split(',');
+                                tagFile.Tag.Performers = toArtist;
+                                toArtist = null;
+                                break;
+                        }
+
+                        switch (album)
+                        {
+                            case "<mantener>":
+                                //Do Nothing
+                                break;
+
+                            case "<borrar>":
+                                tagFile.Tag.Album = null;
+                                break;
+
+                            default:
+                                tagFile.Tag.Album = et.GetAlbum();
+                                break;
+                        }
+
+                        switch (year)
+                        {
+                            case "<mantener>":
+                                //Do Nothing
+                                break;
+
+                            case "<borrar>":
+                                tagFile.Tag.Year = 0;
+                                break;
+
+                            default:
+                                uint yesyear;
+                                bool probandoanyo = uint.TryParse(et.GetYear(), out yesyear);
+
+                                if (probandoanyo == true)
+                                    tagFile.Tag.Year = yesyear;
+                                break;
+                        }
+
+                        switch (comment)
+                        {
+                            case "<mantener>":
+                                //Do Nothing
+                                break;
+
+                            case "<borrar>":
+                                tagFile.Tag.Comment = null;
+                                break;
+
+                            default:
+                                tagFile.Tag.Comment = et.GetComment();
+                                break;
+                        }
+
+                        switch (genre)
+                        {
+                            case "<mantener>":
+                                //Do Nothing
+                                break;
+
+                            case "<borrar>":
+                                tagFile.Tag.Genres = null;
+                                break;
+
+                            default:
+                                string[] toGenre = et.GetGenre().Split(',');
+                                tagFile.Tag.Genres = toGenre;
+                                toGenre = null;
+                                break;
+                        }
+
+                        switch (pista)
+                        {
+                            case "<mantener>":
+                                //Do Nothing
+                                break;
+
+                            case "<borrar>":
+                                tagFile.Tag.Track = 0;
+                                break;
+
+                            default:
+                                uint yestrack;
+                                bool probandotrack = uint.TryParse(et.GetNumber(), out yestrack);
+
+                                if (probandotrack == true)
+                                    tagFile.Tag.Track = yestrack;
+                                break;
+                        }
+
+                        switch (comp)
+                        {
+                            case "<mantener>":
+                                //Do Nothing
+                                break;
+
+                            case "<borrar>":
+                                tagFile.Tag.Composers = null;
+                                break;
+
+                            default:
+                                string[] toComp = et.GetComp().Split(',');
+                                tagFile.Tag.Composers = toComp;
+                                toComp = null;
+                                break;
+                        }
+
+                        switch (numcd)
+                        {
+                            case "<mantener>":
+                                //Do Nothing
+                                break;
+
+                            case "<borrar>":
+                                tagFile.Tag.Disc = 0;
+                                break;
+
+                            default:
+                                uint yesnumcd;
+                                bool probandotrack = uint.TryParse(et.GetNumcd(), out yesnumcd);
+
+                                if (probandotrack == true)
+                                    tagFile.Tag.Disc = yesnumcd;
+                                break;
+                        }
+
+                        if (contEt < total)
+                            AutoClosingMessageBox.Show("Etiqueta " + contEt + " de " +
+                                total + " Guardadas", "Info", 500);
+                        else
+                            MessageBox.Show("Etiqueta " + contEt + " de " +
+                                total + " Guardadas", "Info");
+
+                        tagFile.Save();
+                        tagFile.Dispose();
                     }
                 }
-                
             }
             catch(Exception e_Save)
             {
@@ -426,12 +604,21 @@ namespace InfoMP
                 "programa, iniciar SIN el Menu 'Depurar'"+
                 Environment.NewLine +
                 Environment.NewLine +
-                "Error '.InfoMP' al Guardar: No has seleccionado " +
-                "ninguna cancion despues de cargarlas" +
-                Environment.NewLine +
-                Environment.NewLine +
                 "Error '.mscorlib' al Guardar: Has abierto el programa" +
-                " en depuracion";
+                " en depuracion (Y tampoco has quitado Editar " +
+                "y Continuar en el Visual Studio)" +
+                Environment.NewLine +
+                Environment.NewLine +
+                "Seleccion Multiple <mantener>: Mantiene los datos " +
+                "al guardar" +
+                Environment.NewLine +
+                Environment.NewLine +
+                "Seleccion Multiple <borrar>: Borra los datos " +
+                "al guardar" +
+                Environment.NewLine +
+                Environment.NewLine +
+                "Seleccion Multiple Editada: Todos los datos seleccionados " +
+                "seran cambiados al guardar";
             string caption = "Ayuda";
             DialogResult result = MessageBox.Show(message, caption,
                     MessageBoxButtons.OK, MessageBoxIcon.Question);
@@ -529,6 +716,7 @@ namespace InfoMP
         {
             try
             {
+
                 if (vistalista.SelectedItems.Count <= 1)
                 {
                     if(vistalista.SelectedItems.Count == 1)
@@ -651,6 +839,13 @@ namespace InfoMP
                         numtext.Text = numcd;
                         et.SetNumcd(numcd);
 
+                        //Add Cover CD (To PictureBox1)
+                        MemoryStream img = new MemoryStream(tgFile.Tag.Pictures[0].Data.Data);
+                        et.SetImg(img);
+                        Image bitmap = new Bitmap(et.GetImg());
+                        
+                        pictureBox1.Image = bitmap;
+
                         tgFile.Dispose();
                     }
                 }
@@ -712,6 +907,29 @@ namespace InfoMP
                                 //Read the contents of the file into a stream
                                 var fileStream = openFileDialog.OpenFile();
 
+                                string[] ext = fileName.Split('.');
+                                TagLib.File tgFile = TagLib.File.Create(filePath[pathCount]);
+
+                                //Add Cover CD (To PictureBox1)
+                                Image bitmap = Image.FromFile(filePathOne);
+                                pictureBox1.Image = bitmap;
+                                //And to the file
+                                Etiqueta et = new Etiqueta();
+                                MemoryStream albmStream = new MemoryStream(tgFile.Tag.Pictures[0].Data.Data);
+                                if ((ext[ext.Length - 1] == "jpg")
+                                    || (ext[ext.Length - 1] == "JPG"))
+                                {
+                                    bitmap.Save(albmStream, ImageFormat.Jpeg);
+                                }
+                                et.SetImg(albmStream);
+                                TagLib.Picture picture = new TagLib.Picture(new TagLib.ByteVector(albmStream.ToArray()));
+                                TagLib.Id3v2.AttachedPictureFrame albumCoverPictFrame = new TagLib.Id3v2.AttachedPictureFrame(picture);
+
+                                albumCoverPictFrame.Type = TagLib.PictureType.FrontCover;
+                                TagLib.IPicture[] pictFrames = { albumCoverPictFrame };
+
+                                tags.Pictures = pictFrames;
+
                                 InfoMP(fileName, filePathOne);
                             }
                             else
@@ -721,6 +939,30 @@ namespace InfoMP
                                     var fileStream = openFileDialog.OpenFile();
                                     InfoMP(fileName, filePath[pathCount]);
                                     pathCount++;
+
+                                    string[] ext = fileName.Split('.');
+
+                                    TagLib.File tgFile = TagLib.File.Create(filePath[pathCount]);
+
+                                    //Add Cover CD (To PictureBox1)
+                                    Image bitmap = Image.FromFile(filePath[pathCount]);
+                                    pictureBox1.Image = bitmap;
+                                    //And to the file
+                                    Etiqueta et = new Etiqueta();
+                                    MemoryStream albmStream = new MemoryStream(tgFile.Tag.Pictures[0].Data.Data);
+                                    if ((ext[ext.Length - 1] == "jpg")
+                                        || (ext[ext.Length - 1] == "JPG"))
+                                    {
+                                        bitmap.Save(albmStream, ImageFormat.Jpeg);
+                                    }
+                                    et.SetImg(albmStream);
+                                    TagLib.Picture picture = new TagLib.Picture(new TagLib.ByteVector(albmStream.ToArray()));
+                                    TagLib.Id3v2.AttachedPictureFrame albumCoverPictFrame = new TagLib.Id3v2.AttachedPictureFrame(picture);
+                                    
+                                    albumCoverPictFrame.Type = TagLib.PictureType.FrontCover;
+                                    TagLib.IPicture[] pictFrames = { albumCoverPictFrame };
+
+                                    tags.Pictures = pictFrames;
                                 }
                             }
                         }
@@ -734,51 +976,35 @@ namespace InfoMP
             //TODO
         }
     }
+    
+}
 
-    public class Etiqueta
+public class AutoClosingMessageBox
+{
+    System.Threading.Timer _timeoutTimer;
+    string _caption;
+    AutoClosingMessageBox(string text, string caption, int timeout)
     {
-        protected string title;
-        protected string artist;
-        protected string album;
-        protected string year;
-        protected string num;
-        protected string comment;
-        protected string genre;
-        protected string comp;
-        protected string numcd;
-
-        public void SetTitle(string title) { this.title = title; }
-        public void SetArtist(string artist) { this.artist = artist; }
-        public void SetAlbum(string album) { this.album = album; }
-        public void SetYear(string year) { this.year = year; }
-        public void SetNumber(string num) { this.num = num; }
-        public void SetComment(string comment) { this.comment = comment; }
-        public void SetGenre(string genre) { this.genre = genre; }
-        public void SetComp(string comp) { this.comp = comp; }
-        public void SetNumcd(string numcd) { this.numcd = numcd; }
-
-        public string GetTitle() { return title; }
-        public string GetArtist() { return artist; }
-        public string GetAlbum() { return album; }
-        public string GetYear() { return year; }
-        public string GetNumber() { return num; }
-        public string GetComment() { return comment; }
-        public string GetGenre() { return genre; }
-        public string GetComp() { return comp; }
-        public string GetNumcd() { return numcd; }
+        _caption = caption;
+        _timeoutTimer = new System.Threading.Timer(OnTimerElapsed,
+            null, timeout, System.Threading.Timeout.Infinite);
+        using (_timeoutTimer)
+            MessageBox.Show(text, caption);
     }
-
-    /*
-    public class Archivo
+    public static void Show(string text, string caption, int timeout)
     {
-        protected string file;
-        protected string path;
-        
-        public void SetFile(string file) { this.file = file; }
-        public void SetPath(string path) { this.path = path; }
-
-        public string GetFile() { return file; }
-        public string GetPath() { return path; }
+        new AutoClosingMessageBox(text, caption, timeout);
     }
-    */
+    void OnTimerElapsed(object state)
+    {
+        IntPtr mbWnd = FindWindow("#32770", _caption); // lpClassName is #32770 for MessageBox
+        if (mbWnd != IntPtr.Zero)
+            SendMessage(mbWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+        _timeoutTimer.Dispose();
+    }
+    const int WM_CLOSE = 0x0010;
+    [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
+    static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+    [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+    static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
 }
